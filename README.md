@@ -52,8 +52,8 @@ usage: show-ghstats [-h] [--verbose] sub_command repo_name
 Shows GitHub repo statistics
 
 positional arguments:
-  sub_command    The kind of statistics to show. Possible values: issues, prs,
-                 stars.
+  sub_command    The kind of statistics to show. Possible values: 'issues',
+                 'prs', 'stars'.
   repo_name      Full repository name in the form <repo_owner>/<repo_name>.
 
 optional arguments:
@@ -76,7 +76,7 @@ $ show-ghstats stars "jmcgeheeiv/pyfakefs"
 
 And the same for the open issues:
 ```
-$ show-ghstats issues "jmcgeheeiv/pyfakefs"
+$ show-ghstats issues "vvvv/svg"
 ```
 ![issues](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/issues.jpg)
 
@@ -85,5 +85,6 @@ To do
 A list of things I may add at some time:
 - add tests
 - output results to csv
+- add from/to dates
 - add more statistics
 - cache/reuse read statistics
