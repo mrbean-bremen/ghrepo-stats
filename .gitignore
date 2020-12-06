@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pip build files
+build/
+dist/
+*.egg-info/
+
+
+# PyCharm IDE files
+.idea/
+
+# Tox environments
+.tox/
+
+# file with authorization info shall not be added
+ghrepo-stats.ini
