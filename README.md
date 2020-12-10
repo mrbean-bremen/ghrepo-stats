@@ -53,7 +53,7 @@ Shows GitHub repo statistics
 
 positional arguments:
   sub_command    The kind of statistics to show. Possible values: 'issues',
-                 'prs', 'stars'.
+                 'prs', 'stars', 'commits'.
   repo_name      Full repository name in the form <repo_owner>/<repo_name>.
 
 optional arguments:
@@ -68,17 +68,23 @@ $ show-ghstats stars "my-github-username/my-repo"
 
 Example
 -------
-Here is the result of the command:
+Show the number of stargazers over time:
 ```
 $ show-ghstats stars "jmcgeheeiv/pyfakefs"
 ```
 ![stars](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/stars.jpg)
 
-And the same for the open issues:
+Check how many issues have been open over time:
 ```
 $ show-ghstats issues "vvvv/svg"
 ```
 ![issues](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/issues.jpg)
+
+See how the code size changed over time measured in additions/deletions:
+```
+$ show-ghstats codesize "pytest-dev/pytest"
+```
+![issues](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/codesize.jpg)
 
 To do
 -----

@@ -136,6 +136,34 @@ class GitHubStats:
         title = f"Number of stargazers over time"
         self.show_plot(star_nrs, star_times, title)
 
+    def commit_stats(self):
+        commits = self.repository().get_stats_commit_activity()
+        times = []
+        commit_nrs = []
+        for commit_stat in commits:
+            if self.verbose:
+                print(commit_stat.week, commit_stat.total)
+            times.append(commit_stat.week)
+            commit_nrs.append(commit_stat.total)
+
+        title = f"Number of commit per week in last year"
+        self.show_plot(commit_nrs, times, title)
+
+    def code_size_change(self):
+        freq_stats = self.repository().get_stats_code_frequency()
+        times = []
+        commit_size = []
+        code_size = 0
+        for freq in freq_stats:
+            if self.verbose:
+                print(freq.week, freq.additions, freq.deletions)
+            times.append(freq.week)
+            code_size += freq.additions - freq.deletions
+            commit_size.append(code_size)
+
+        title = f"Change of code size over time"
+        self.show_plot(commit_size, times, title)
+
     def show_plot(self, issue_nrs, issue_times, title):
         pyplot.plot(issue_times, issue_nrs)
         max_y = max(issue_nrs) + 1
@@ -149,7 +177,9 @@ def main():
     commands = {
         "issues": GitHubStats.issue_stats,
         "prs": GitHubStats.pr_stats,
-        "stars": GitHubStats.star_stats
+        "stars": GitHubStats.star_stats,
+        "commits": GitHubStats.commit_stats,
+        "codesize": GitHubStats.code_size_change,
     }
     command_string = ", ".join([f"'{cmd}'" for cmd in commands])
     parser = argparse.ArgumentParser(
