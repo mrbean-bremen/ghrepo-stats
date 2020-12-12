@@ -20,12 +20,16 @@ Currently, the following sub-commands are supported:
   number of additions and deletions
 
 _Caution:_
-Don't `issues` or `prs` sub-commands with repositories with many (open or
+Don't use `issues` or `prs` sub-commands with repositories with many (open or
 close) issues - this will take a lot of time and load on the GitHub API. 
 
 Installation
 ------------
-If you want to try it, you can install it from GitHub:
+If you want to try it, you can install it from PyPi:
+```
+pip install ghrepo-stats
+```
+Or you can install the current master from GitHub:
 ```
 pip install git+https://github.com/mrbean-bremen/ghrepo-stats
 ```
@@ -74,20 +78,20 @@ time (note: stars that have been retracted are not counted):
 ```
 $ show-ghstats stars "jmcgeheeiv/pyfakefs"
 ```
-![stars](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/stars.jpg)
+![stars](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/stars.jpg)
 
 Check how fast issues are handled by showing how many issues have been open
 over time:
 ```
 $ show-ghstats issues "vvvv/svg"
 ```
-![issues](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/issues.jpg)
+![issues](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/issues.jpg)
 
 See how the code size changed over time measured in code additions/deletions:
 ```
 $ show-ghstats codesize "pytest-dev/pytest"
 ```
-![issues](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/codesize.jpg)
+![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/codesize.jpg)
 
 To do
 -----
