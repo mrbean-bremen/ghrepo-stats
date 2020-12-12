@@ -2,13 +2,11 @@
 
 Have you ever wondered how the number of stargazers or the number of open
 issues has changed over time for your (or any) GitHub repository? I did, so I 
-wrote this small command line tool to do this (and to play around with the
-GitHub API).
+wrote this small command line tool to do this.
 
 *ghrepo-stats* uses [pygithub](https://github.com/PyGithub/PyGithub) to 
 collect some statistics from a specific repository using a command line tool
 and show it using [matplotlib](https://github.com/matplotlib/matplotlib). 
-This is mostly a playground to try out the GitHub API.
 
 Features
 --------
@@ -17,10 +15,13 @@ Currently, the following sub-commands are supported:
   have removed their star are not shown, as the info is not available)
 - issues: shows the number of open issues over time
 - prs: shows the number of open pull requests over time
+- commits: shows the number of commits over the last year
+- codesize: shows the change of the code size over time measured by the 
+  number of additions and deletions
 
 _Caution:_
-Don't try this with repositories with many (open or close) issues - this will
-take a lot of time and load on the GitHub API. 
+Don't `issues` or `prs` sub-commands with repositories with many (open or
+close) issues - this will take a lot of time and load on the GitHub API. 
 
 Installation
 ------------
@@ -53,7 +54,7 @@ Shows GitHub repo statistics
 
 positional arguments:
   sub_command    The kind of statistics to show. Possible values: 'issues',
-                 'prs', 'stars', 'commits'.
+                 'prs', 'stars', 'commits', 'codesize'.
   repo_name      Full repository name in the form <repo_owner>/<repo_name>.
 
 optional arguments:
@@ -66,21 +67,23 @@ So, for example, to get a star plot of a specific repository, you can write:
 $ show-ghstats stars "my-github-username/my-repo"
 ```
 
-Example
--------
-Show the number of stargazers over time:
+Examples
+--------
+Get some measure of popularity change by showing the number of stargazers over
+time (note: stars that have been retracted are not counted):
 ```
 $ show-ghstats stars "jmcgeheeiv/pyfakefs"
 ```
 ![stars](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/stars.jpg)
 
-Check how many issues have been open over time:
+Check how fast issues are handled by showing how many issues have been open
+over time:
 ```
 $ show-ghstats issues "vvvv/svg"
 ```
 ![issues](https://github.com/mrbean-bremen/ghrepo-stats/blob/master/doc/images/issues.jpg)
 
-See how the code size changed over time measured in additions/deletions:
+See how the code size changed over time measured in code additions/deletions:
 ```
 $ show-ghstats codesize "pytest-dev/pytest"
 ```
