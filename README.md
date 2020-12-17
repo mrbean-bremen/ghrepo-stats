@@ -52,7 +52,7 @@ token = 123456789abcdef0123456789abcdef012345678
 To get usage information you can now type:
 ```
 $ show-ghstats -h
-usage: show-ghstats [-h] [--verbose] sub_command repo_name
+usage: show-ghstats [-h] [--verbose] [--csv CSV] sub_command repo_name
 
 Shows GitHub repo statistics
 
@@ -64,12 +64,20 @@ positional arguments:
 optional arguments:
   -h, --help     show this help message and exit
   --verbose, -v  Outputs diagnostic information
+  --csv CSV      Write the output into a csv file with the given file path
 ```
 
 So, for example, to get a star plot of a specific repository, you can write:
 ```
 $ show-ghstats stars "my-github-username/my-repo"
 ```
+If you want to have the numbers saved in a csv file instead to play around with
+the numbers you can write: 
+```
+$ show-ghstats stars "my-github-username/my-repo" --csv=my_repo-issues
+```
+This will write a file `my_repo-issues.csv` with the numbers (date+time /
+number of issues) in the current path.
 
 Examples
 --------
@@ -93,11 +101,3 @@ $ show-ghstats codesize "pytest-dev/pytest"
 ```
 ![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/codesize.jpg)
 
-To do
------
-A list of things I may add at some time:
-- add tests
-- output results to csv
-- add from/to dates
-- add more statistics
-- cache/reuse read statistics

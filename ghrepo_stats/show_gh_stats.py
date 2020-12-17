@@ -1,6 +1,8 @@
 # Copyright 2020 mrbean-bremen. See LICENSE file for details.
 import argparse
 import configparser
+import csv
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as pyplot
@@ -66,11 +68,15 @@ class ConfigReader:
 
 
 class GitHubStats:
-    def __init__(self, repo_name: str, verbose: bool):
+    def __init__(self, repo_name: str, verbose: bool, csv_file: str = ""):
         self.repo_name: str = repo_name
         self.verbose = verbose
         self.config = ConfigReader()
         self.github = Github(self.config.username, self.config.token)
+        extension = os.path.splitext(csv_file)[1]
+        if not extension:
+            csv_file = csv_file + ".csv"
+        self.csv_file = csv_file
 
     def issue_stats(self):
         return self.issue_pr_stats(show_issues=True)
@@ -114,7 +120,7 @@ class GitHubStats:
 
         issue_type = "issues" if show_issues else "pull requests"
         title = f"Number of open {issue_type} over time"
-        self.show_plot(issue_nrs, issue_times, title)
+        return self.handle_output(issue_nrs, issue_times, title)
 
     def star_stats(self):
         stargazers = self.repository().get_stargazers_with_dates()
@@ -134,7 +140,7 @@ class GitHubStats:
             star_times.append(t)
 
         title = f"Number of stargazers over time"
-        self.show_plot(star_nrs, star_times, title)
+        return self.handle_output(star_nrs, star_times, title)
 
     def commit_stats(self):
         commits = self.repository().get_stats_commit_activity()
@@ -147,7 +153,7 @@ class GitHubStats:
             commit_nrs.append(commit_stat.total)
 
         title = f"Number of commit per week in last year"
-        self.show_plot(commit_nrs, times, title)
+        return self.handle_output(commit_nrs, times, title)
 
     def code_size_change(self):
         freq_stats = self.repository().get_stats_code_frequency()
@@ -162,7 +168,14 @@ class GitHubStats:
             commit_size.append(code_size)
 
         title = f"Change of code size over time"
-        self.show_plot(commit_size, times, title)
+        return self.handle_output(commit_size, times, title)
+
+    def handle_output(self, numbers, times, title):
+        if self.csv_file:
+            return self.write_csv(numbers, times)
+        else:
+            self.show_plot(numbers, times, title)
+            return True
 
     def show_plot(self, issue_nrs, issue_times, title):
         pyplot.plot(issue_times, issue_nrs)
@@ -171,6 +184,24 @@ class GitHubStats:
         pyplot.yticks(range(0, max_y, step))
         pyplot.title(f"{self.repo_name}: {title}")
         pyplot.show()
+
+    def write_csv(self, numbers, times):
+        directory = os.path.dirname(self.csv_file)
+        if directory:
+            try:
+                os.makedirs(self.csv_file, exist_ok=True)
+            except OSError:
+                print(f"Failed to create path {directory} - exiting")
+            return False
+        try:
+            with open(self.csv_file, "w") as csv_file:
+                writer = csv.writer(csv_file, lineterminator="\n")
+                for t, nr in zip(times, numbers):
+                    writer.writerow([t, nr])
+        except OSError:
+            print(f"Failed to write csv file {self.csv_file} - exiting")
+            return False
+        return True
 
 
 def main():
@@ -192,6 +223,8 @@ def main():
                              "<repo_owner>/<repo_name>.")
     parser.add_argument("--verbose", "-v", action="store_true",
                         help="Outputs diagnostic information")
+    parser.add_argument("--csv", help="Write the output into a csv file "
+                                      "with the given file path")
     args = parser.parse_args()
     repo_name = args.repo_name
     sub_command = args.sub_command.lower()
@@ -201,7 +234,7 @@ def main():
               f"Supported commands: {command_string}")
         return 1
     try:
-        stats = GitHubStats(repo_name, args.verbose)
+        stats = GitHubStats(repo_name, args.verbose, args.csv)
         commands[sub_command](stats)
     except Exception as exc:
         print(exc)
