@@ -1,4 +1,4 @@
-# ghrepo-stats
+# ghrepo-stats [![PyPI version](https://badge.fury.io/py/ghrepo-stats.svg)](https://badge.fury.io/py/ghrepo-stats)
 
 Have you ever wondered how the number of stargazers or the number of open
 issues has changed over time for your (or any) GitHub repository? I did, so I 
@@ -6,11 +6,12 @@ wrote this small command line tool to do this.
 
 *ghrepo-stats* uses [pygithub](https://github.com/PyGithub/PyGithub) to 
 collect some statistics from a specific repository using a command line tool
-and show it using [matplotlib](https://github.com/matplotlib/matplotlib). 
+and show it using [matplotlib](https://github.com/matplotlib/matplotlib) or
+write it to a csv file. 
 
 Features
 --------
-Currently, the following sub-commands are supported:
+The following sub-commands are supported:
 - stars: shows the number of stargazers over time (caveat: stargazers that
   have removed their star are not shown, as the info is not available)
 - issues: shows the number of open issues over time
