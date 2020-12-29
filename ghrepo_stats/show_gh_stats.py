@@ -73,9 +73,10 @@ class GitHubStats:
         self.verbose = verbose
         self.config = ConfigReader()
         self.github = Github(self.config.username, self.config.token)
-        extension = os.path.splitext(csv_file)[1]
-        if not extension:
-            csv_file = csv_file + ".csv"
+        if csv_file:
+            extension = os.path.splitext(csv_file)[1]
+            if not extension:
+                csv_file = csv_file + ".csv"
         self.csv_file = csv_file
 
     def issue_stats(self):
