@@ -172,11 +172,13 @@ class GitHubStats:
         return self.handle_output(commit_size, times, title)
 
     def handle_output(self, numbers, times, title):
+        if not numbers:
+            print("No data points available - nothing to do.")
+            return False
         if self.csv_file:
             return self.write_csv(numbers, times)
-        else:
-            self.show_plot(numbers, times, title)
-            return True
+        self.show_plot(numbers, times, title)
+        return True
 
     def show_plot(self, issue_nrs, issue_times, title):
         pyplot.plot(issue_times, issue_nrs)
