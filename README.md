@@ -14,15 +14,20 @@ Features
 The following sub-commands are supported:
 - stars: shows the number of stargazers over time (caveat: stargazers that
   have removed their star are not shown, as the info is not available)
-- issues: shows the number of open issues over time
-- prs: shows the number of open pull requests over time
+- issues: shows the number of currently open issues over time
+- prs: shows the number of currently open pull requests over time
 - commits: shows the number of commits over the last year
 - codesize: shows the change of the code size over time measured by the 
-  number of additions and deletions
+  number of added and deleted lines
+- issue-life: shows the average life time in days of issues over time
+  (sampled once a week) 
+- pr-life: shows the average life time in days of issues over time 
+  (sampled once a week) 
 
 _Caution:_
-Don't use `issues` or `prs` sub-commands with repositories with many (open or
-close) issues - this will take a lot of time and load on the GitHub API. 
+Using sub-commands related to issues and PRs on repositories with many
+(open or close) issues  will take a lot of time due to API access
+limitations.  
 
 Installation
 ------------
@@ -59,7 +64,8 @@ Shows GitHub repo statistics
 
 positional arguments:
   sub_command    The kind of statistics to show. Possible values: 'issues',
-                 'prs', 'stars', 'commits', 'codesize'.
+                 'prs', 'stars', 'commits', 'codesize', 'issue-life', 'pr-
+                 life'.
   repo_name      Full repository name in the form <repo_owner>/<repo_name>.
 
 optional arguments:
@@ -88,6 +94,15 @@ time (note: stars that have been retracted are not counted):
 $ show-ghstats stars "jmcgeheeiv/pyfakefs"
 ```
 ![stars](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/stars.jpg)
+
+Check how fast issues are handled over time. An increasing curve means ever 
+more unresolved issues (also depends on the policies of the specific
+project - some projects leave issues open indefinitely, while others close 
+outdated issues):
+```
+$ show-ghstats issue-life "jmcgeheeiv/pyfakefs"
+```
+![issue-lifetime](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/issuelife.jpg)
 
 Check how fast issues are handled by showing how many issues have been open
 over time:

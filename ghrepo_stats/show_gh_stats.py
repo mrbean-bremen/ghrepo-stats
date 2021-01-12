@@ -3,7 +3,10 @@ import argparse
 import configparser
 import csv
 import os
+from collections import namedtuple
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import List
 
 import matplotlib.pyplot as pyplot
 from github import Github, UnknownObjectException
@@ -93,22 +96,12 @@ class GitHubStats:
                 f"No repository found with name {self.repo_name}")
 
     def issue_pr_stats(self, show_issues: bool):
-        issues = self.repository().get_issues(state="all")
+        issues = self.collect_issues_or_prs(show_issues)
         times = []
         for issue in issues:
-            if show_issues != (issue.pull_request is None):
-                # ignore PRs or issues
-                continue
-            if (issue.closed_at is not None and
-                    (issue.closed_at - issue.created_at).seconds < 60):
-                # ignore immediately closed issues
-                # happens for imported closed issues
-                continue
-            if self.verbose:
-                print(issue.number, issue.created_at, issue.closed_at)
-            times.append((issue.created_at, 1))
-            if issue.closed_at is not None:
-                times.append((issue.closed_at, -1))
+            times.append((issue.opened, 1))
+            if issue.closed is not None:
+                times.append((issue.closed, -1))
 
         times = sorted(times)
         issue_nrs = []
@@ -171,6 +164,75 @@ class GitHubStats:
         title = f"Change of code size over time"
         return self.handle_output(commit_size, times, title)
 
+    def issue_pr_lifetime(self, show_issues: bool):
+        # count the life time weekly
+        issues = self.collect_issues_or_prs(show_issues)
+
+        if not issues:
+            return self.handle_output([], [], "")
+
+        slots: List[dict] = []
+        start_time = issues[-1].opened
+        now = datetime.now()
+        slot_time = start_time
+        while slot_time < now:
+            slots.append({"time": slot_time, "nr": 0, "days": 0})
+            slot_time = slot_time + timedelta(days=7)
+
+        slot_len = len(slots)
+        for issue in reversed(issues):
+            days_from_start = (issue.opened - start_time).days
+            index = days_from_start // 7
+            days = 7 - days_from_start % 7
+            end_time = issue.closed or now
+            # add increasing issue length at issue lifetime
+            while index < slot_len and slots[index]["time"] < end_time:
+                slots[index]["days"] += days
+                slots[index]["nr"] += 1
+                days += 7
+                index += 1
+            days = (end_time - issue.opened).days
+            # add issue duration to slots after it is closed
+            while index < slot_len:
+                slots[index]["days"] += days
+                slots[index]["nr"] += 1
+                index += 1
+
+        issue_nrs = []
+        issue_times = []
+        for slot in slots:
+            issue_nrs.append(slot["days"] // slot["nr"])
+            issue_times.append(slot["time"])
+
+        issue_type = "issues" if show_issues else "pull requests"
+        title = f"Lifetime of {issue_type} over time"
+        return self.handle_output(issue_nrs, issue_times, title)
+
+    def collect_issues_or_prs(self, collect_issues):
+        results = self.repository().get_issues(state="all")
+        Issue = namedtuple("Issue", ["opened", "closed"])
+        issues: List[Issue] = []
+        for issue in results:
+            if collect_issues != (issue.pull_request is None):
+                # ignore PRs or issues
+                continue
+            if (issue.closed_at is not None and
+                    (issue.closed_at - issue.created_at).seconds < 60):
+                # ignore immediately closed issues
+                # happens for imported closed issues
+                continue
+            if self.verbose:
+                print(issue.number, issue.created_at, issue.closed_at)
+            issues.append(Issue(opened=issue.created_at,
+                                closed=issue.closed_at))
+        return issues
+
+    def issue_lifetime(self):
+        return self.issue_pr_lifetime(show_issues=True)
+
+    def pr_lifetime(self):
+        return self.issue_pr_lifetime(show_issues=False)
+
     def handle_output(self, numbers, times, title):
         if not numbers:
             print("No data points available - nothing to do.")
@@ -214,6 +276,8 @@ def main():
         "stars": GitHubStats.star_stats,
         "commits": GitHubStats.commit_stats,
         "codesize": GitHubStats.code_size_change,
+        "issue-life": GitHubStats.issue_lifetime,
+        "pr-life": GitHubStats.pr_lifetime
     }
     command_string = ", ".join([f"'{cmd}'" for cmd in commands])
     parser = argparse.ArgumentParser(
