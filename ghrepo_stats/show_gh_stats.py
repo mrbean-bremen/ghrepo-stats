@@ -43,11 +43,11 @@ class ConfigReader:
         # first check in the repository root path
         current_path = Path(__file__).parent.parent
         path = current_path / self.ini_file
-        if path.exists:
+        if path.exists():
             return path
         # fall back to home directory
         path = Path.home() / self.ini_file
-        if path.exists:
+        if path.exists():
             return path
         raise FileNotFoundError(
             f"Missing initialization file {self.ini_file}, "
