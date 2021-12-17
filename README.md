@@ -35,7 +35,7 @@ If you want to try it, you can install it from PyPi:
 ```
 pip install ghrepo-stats
 ```
-Or you can install the current master from GitHub:
+Or you can install the current main branch from GitHub:
 ```
 pip install git+https://github.com/mrbean-bremen/ghrepo-stats
 ```
@@ -93,7 +93,7 @@ time (note: stars that have been retracted are not counted):
 ```
 $ show-ghstats stars "jmcgeheeiv/pyfakefs"
 ```
-![stars](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/stars.jpg)
+![stars](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/stars.jpg)
 
 Check how fast issues are handled over time. An increasing curve means ever 
 more unresolved issues (also depends on the policies of the specific
@@ -102,18 +102,18 @@ outdated issues):
 ```
 $ show-ghstats issue-life "jmcgeheeiv/pyfakefs"
 ```
-![issue-lifetime](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/issuelife.jpg)
+![issue-lifetime](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issuelife.jpg)
 
 Check how fast issues are handled by showing how many issues have been open
 over time:
 ```
 $ show-ghstats issues "vvvv/svg"
 ```
-![issues](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/issues.jpg)
+![issues](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issues.jpg)
 
 See how the code size changed over time measured in code additions/deletions:
 ```
 $ show-ghstats codesize "pytest-dev/pytest"
 ```
-![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/master/doc/images/codesize.jpg)
+![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/codesize.jpg)
 
