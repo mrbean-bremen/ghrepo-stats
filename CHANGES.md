@@ -1,4 +1,4 @@
-# ghrepo-stat Release Notes
+# Release Notes
 
 ## [Version 0.3.1](https://pypi.org/project/ghrepo-stats/0.3.1/) (2021-12-17)
 
@@ -10,7 +10,7 @@
 ### New features
 * added statistics for issue and PR life time change
 
-# Fixes
+### Fixes
 * correctly handle case with no data points
 
 ## [Version 0.2.1](https://pypi.org/project/ghrepo-stats/0.2.1/) (2020-12-29)

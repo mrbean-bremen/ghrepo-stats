@@ -1,8 +1,8 @@
 # ghrepo-stats [![PyPI version](https://badge.fury.io/py/ghrepo-stats.svg)](https://badge.fury.io/py/ghrepo-stats)
 
 Have you ever wondered how the number of stargazers or the number of open
-issues has changed over time for your (or any) GitHub repository? I did, so I 
-wrote this small command line tool to do this.
+issues has changed over time for your or any public GitHub repository? I did, 
+so I wrote this small command line tool that will show this data.
 
 *ghrepo-stats* uses [pygithub](https://github.com/PyGithub/PyGithub) to 
 collect some statistics from a specific repository using a command line tool
@@ -42,7 +42,7 @@ pip install git+https://github.com/mrbean-bremen/ghrepo-stats
 
 Usage
 -----
-To use this, you need a 
+To use this, you need a GitHub account and a
 [personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)
 able to read public repositories for your GitHub account. The user name and
 token is expected to be found in the file `ghrepo-stats.ini`, either in the
@@ -93,27 +93,28 @@ time (note: stars that have been retracted are not counted):
 ```
 $ show-ghstats stars "jmcgeheeiv/pyfakefs"
 ```
-![stars](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/stars.jpg)
+![stars](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/stars.png)
 
-Check how fast issues are handled over time. An increasing curve means ever 
-more unresolved issues (also depends on the policies of the specific
-project - some projects leave issues open indefinitely, while others close 
-outdated issues):
-```
-$ show-ghstats issue-life "jmcgeheeiv/pyfakefs"
-```
-![issue-lifetime](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issuelife.jpg)
-
-Check how fast issues are handled by showing how many issues have been open
-over time:
+Check how issues are handled over time. There are two possibilities:
+ - Show the number of open issues at any point in time:
 ```
 $ show-ghstats issues "vvvv/svg"
 ```
-![issues](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issues.jpg)
+![issues](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issues.png)
 
-See how the code size changed over time measured in code additions/deletions:
+ - Show the average lifetime of an issue as it changes over time. An 
+   increasing curve means ever more unresolved issues (also depends on the
+   policies of the specific project - some projects leave issues open
+   indefinitely, while others close outdated issues):
+```
+$ show-ghstats issue-life "jmcgeheeiv/pyfakefs"
+```
+![issue-lifetime](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issuelife.png)
+
+Get some measure of activity by checking how the code size changed over time 
+(measured in code additions/deletions):
 ```
 $ show-ghstats codesize "pytest-dev/pytest"
 ```
-![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/codesize.jpg)
+![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/codesize.png)
 
