@@ -2,6 +2,8 @@
 import argparse
 import configparser
 import csv
+import enum
+import json
 import os
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -18,6 +20,23 @@ class MissingConfig(Exception):
 
 class UnknownRepository(Exception):
     pass
+
+
+class StatKind(enum.Enum):
+    Issues = 0,
+    Stars = 1
+
+
+def write_datetime(obj):
+    if isinstance(obj, datetime):
+        return {"iso": obj.isoformat()}
+
+
+def read_datetime(obj):
+    iso_format = obj.get('iso')
+    if iso_format is not None:
+        return datetime.fromisoformat(iso_format)
+    return obj
 
 
 class ConfigReader:
@@ -71,6 +90,8 @@ class ConfigReader:
 
 
 class GitHubStats:
+    cache_dir = ".ghrepo-stats"
+
     def __init__(self, repo_name: str, verbose: bool, csv_file: str = ""):
         self.repo_name: str = repo_name
         self.verbose = verbose
@@ -117,14 +138,37 @@ class GitHubStats:
         return self.handle_output(issue_nrs, issue_times, title)
 
     def star_stats(self):
-        stargazers = self.repository().get_stargazers_with_dates()
-        times = []
+        start = datetime.utcnow()
+        stargazers = self.repository().get_stargazers_with_dates().reversed
+        cached, since = self.cached_result(StatKind.Stars)
+        if stargazers.totalCount < len(cached):
+            # void the cache if stars have been removed
+            cached.clear()
+        existing_ids = [e["id"] for e in cached]
+        results = []
         for stargazer in stargazers:
             if self.verbose:
                 print(stargazer.starred_at, stargazer.user.login)
-            times.append(stargazer.starred_at)
+            user_id = stargazer.user.id
+            if user_id in existing_ids:
+                if len(cached) > stargazers.totalCount - len(results):
+                    cached.clear()
+                else:
+                    break
+            results.append({
+                "starred_at": stargazer.starred_at,
+                "id": stargazer.user.id
+            })
+        if results:
+            results.sort(key=lambda s: s["starred_at"])
+            cached.extend(results)
+            self.write_cache(cached, start, StatKind.Stars)
 
-        times = sorted(times)
+        times = []
+        for stargazer in cached:
+            times.append(stargazer["starred_at"])
+        if self.verbose:
+            print(f"Getting stars took {datetime.utcnow() - start}")
         star_nrs = []
         star_times = []
         nr = 0
@@ -165,7 +209,7 @@ class GitHubStats:
         return self.handle_output(commit_size, times, title)
 
     def issue_pr_lifetime(self, show_issues: bool):
-        # count the life time weekly
+        # count the lifetime weekly
         issues = self.collect_issues_or_prs(show_issues)
 
         if not issues:
@@ -173,7 +217,7 @@ class GitHubStats:
 
         slots: List[dict] = []
         start_time = issues[-1].opened
-        now = datetime.now()
+        now = datetime.utcnow()
         slot_time = start_time
         while slot_time < now:
             slots.append({"time": slot_time, "nr": 0, "days": 0})
@@ -209,22 +253,52 @@ class GitHubStats:
         return self.handle_output(issue_nrs, issue_times, title)
 
     def collect_issues_or_prs(self, collect_issues):
-        results = self.repository().get_issues(state="all")
+        cached, since = self.cached_result(StatKind.Issues)
+        last_number = 0
+        kwargs = {"state": "all"}
+        if cached:
+            kwargs["since"] = since + timedelta(seconds=1)
+            last_number = cached[-1]["number"]
+        start = datetime.utcnow()
+        results = self.repository().get_issues(**kwargs)
+        new_results = []
+        for result in results:
+            new_results.append({
+                "is_pr": result.pull_request is not None,
+                "created_at": result.created_at,
+                "closed_at": result.closed_at,
+                "number": result.number,
+                "state": result.state
+            })
+            if result.number <= last_number:
+                # an existing issues has been closed or reopened -
+                # remove it from cache
+                for c in cached:
+                    if c["number"] == result.number:
+                        cached.remove(c)
+                        break
+        if self.verbose:
+            print(f"Getting issues/prs took {datetime.utcnow() - start}")
+        if new_results:
+            cached.extend(new_results)
+            cached.sort(key=lambda v: v["number"])
+            self.write_cache(cached, start, StatKind.Issues)
+
         Issue = namedtuple("Issue", ["opened", "closed"])
         issues: List[Issue] = []
-        for issue in results:
-            if collect_issues != (issue.pull_request is None):
+        for issue in cached:
+            if collect_issues == issue["is_pr"]:
                 # ignore PRs or issues
                 continue
-            if (issue.closed_at is not None and
-                    (issue.closed_at - issue.created_at).seconds < 60):
+            if (issue["closed_at"] is not None and
+                    (issue["closed_at"] - issue["created_at"]).seconds < 60):
                 # ignore immediately closed issues
                 # happens for imported closed issues
                 continue
             if self.verbose:
-                print(issue.number, issue.created_at, issue.closed_at)
-            issues.append(Issue(opened=issue.created_at,
-                                closed=issue.closed_at))
+                print(issue["number"], issue["created_at"], issue["closed_at"])
+            issues.append(Issue(opened=issue["created_at"],
+                                closed=issue["closed_at"]))
         return issues
 
     def issue_lifetime(self):
@@ -267,6 +341,29 @@ class GitHubStats:
             print(f"Failed to write csv file {self.csv_file} - exiting")
             return False
         return True
+
+    def cache_path(self, stat_kind):
+        org, name = self.repo_name.split("/")
+        return (Path.home() / self.cache_dir / org / name /
+                (stat_kind.name + ".json"))
+
+    def cached_result(self, stat_kind):
+        cache_path = self.cache_path(stat_kind)
+        if cache_path.exists():
+            with open(cache_path) as f:
+                cached = json.load(f, object_hook=read_datetime)
+                return cached["data"], cached["since"]
+        return [], None
+
+    def write_cache(self, result, date, stat_kind):
+        cache_path = self.cache_path(stat_kind)
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cached = {
+            "since": date,
+            "data": result
+        }
+        with open(cache_path, "w") as f:
+            json.dump(cached, f, default=write_datetime)
 
 
 def main():

@@ -1,5 +1,11 @@
 # Release Notes
 
+## [Version 0.4.0](https://pypi.org/project/ghrepo-stats/0.4.0/) (2022-12-26)
+
+### Changes
+* statistics for issues, PRs and stars are now cached in the filesystem and will be 
+  used on subsequent calls
+
 ## [Version 0.3.1](https://pypi.org/project/ghrepo-stats/0.3.1/) (2021-12-17)
 
 ### Fixes

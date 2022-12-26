@@ -86,6 +86,14 @@ $ show-ghstats stars "my-github-username/my-repo" --csv=my_repo-issues
 This will write a file `my_repo-issues.csv` with the numbers (date+time /
 number of issues) in the current path.
 
+Caching
+-------
+Some of the values retrieved from repositories are cached - specifically 
+issues, prs, issue-life, pr-life and stars. The caches are written as json files 
+into the directory `.ghrepo-stats` in the home directory of the current user.
+Especially for repositories with many issues this decreases the time needed to get 
+the data dramatically, if called a second time for the same repository.  
+
 Examples
 --------
 Get some measure of popularity change by showing the number of stargazers over
