@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import List
 
 import matplotlib.pyplot as pyplot
+import requests
+from bs4 import BeautifulSoup
 from github import Github, UnknownObjectException
 
 
@@ -92,9 +94,12 @@ class ConfigReader:
 class GitHubStats:
     cache_dir = ".ghrepo-stats"
 
-    def __init__(self, repo_name: str, verbose: bool, csv_file: str = ""):
+    def __init__(self, repo_name: str, verbose: bool, csv_file: str = "",
+                 show_packages: bool = False, min_stars: int = 0):
         self.repo_name: str = repo_name
         self.verbose = verbose
+        self.show_packages = show_packages
+        self.min_stars = min_stars
         self.config = ConfigReader()
         self.github = Github(self.config.username, self.config.token)
         if csv_file:
@@ -365,6 +370,47 @@ class GitHubStats:
         with open(cache_path, "w") as f:
             json.dump(cached, f, default=write_datetime)
 
+    def dependents(self):
+        # partly taken from https://stackoverflow.com/a/58772379/12480730
+        subquery = "?dependent_type=PACKAGE" if self.show_packages else ""
+        url = f"https://github.com/{self.repo_name}/network/dependents{subquery}"
+        repos = []
+        while True:
+            r = requests.get(url)
+            soup = BeautifulSoup(r.content, "html.parser")
+            data = [
+                ("{}/{}".format(
+                    t.find('a',
+                           {"data-repository-hovercards-enabled": ""}).text,
+                    t.find('a', {"data-hovercard-type": "repository"}).text
+                ), int(t.div.span.text.strip().replace(",", "")))
+                for t in
+                soup.findAll("div", {"data-test-id": "dg-repo-pkg-dependent"})
+            ]
+            if not data:
+                break
+            repos.extend([r for r in data if r[1] >= self.min_stars])
+
+            button_anchors = soup.find(
+                "div", {"class": "paginate-container"}
+            ).find_all("a")
+            for anchor in button_anchors:
+                if anchor.text == "Next":
+                    url = anchor["href"]
+                    break
+            else:
+                break
+        # sort descending by number of stargazers
+        repos.sort(key=lambda d: d[1], reverse=True)
+        if self.csv_file:
+            names = [r[0] for r in repos]
+            stars = [r[1] for r in repos]
+            self.write_csv(stars, names)
+        else:
+            # if no file was given, just write to stdout
+            for name, star in repos:
+                print(f"{name}\t{star}")
+
 
 def main():
     commands = {
@@ -374,7 +420,8 @@ def main():
         "commits": GitHubStats.commit_stats,
         "codesize": GitHubStats.code_size_change,
         "issue-life": GitHubStats.issue_lifetime,
-        "pr-life": GitHubStats.pr_lifetime
+        "pr-life": GitHubStats.pr_lifetime,
+        "dependents": GitHubStats.dependents
     }
     command_string = ", ".join([f"'{cmd}'" for cmd in commands])
     parser = argparse.ArgumentParser(
@@ -389,6 +436,13 @@ def main():
                         help="Outputs diagnostic information")
     parser.add_argument("--csv", help="Write the output into a csv file "
                                       "with the given file path")
+    parser.add_argument("--packages", action="store_true",
+                        help="Only for dependents: get dependent packages "
+                             "instead of repositories")
+    parser.add_argument("--min-stars", type=int,
+                        help="Only for dependents: limits the output to "
+                             "dependents with at least the given number of "
+                             "stargazers.")
     args = parser.parse_args()
     repo_name = args.repo_name
     sub_command = args.sub_command.lower()
@@ -398,7 +452,8 @@ def main():
               f"Supported commands: {command_string}")
         return 1
     try:
-        stats = GitHubStats(repo_name, args.verbose, args.csv)
+        stats = GitHubStats(repo_name, args.verbose, args.csv,
+                            args.packages, args.min_stars)
         commands[sub_command](stats)
     except Exception as exc:
         print(exc)

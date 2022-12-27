@@ -65,13 +65,17 @@ Shows GitHub repo statistics
 positional arguments:
   sub_command    The kind of statistics to show. Possible values: 'issues',
                  'prs', 'stars', 'commits', 'codesize', 'issue-life', 'pr-
-                 life'.
+                 life', 'dependents'.
   repo_name      Full repository name in the form <repo_owner>/<repo_name>.
 
 optional arguments:
   -h, --help     show this help message and exit
   --verbose, -v  Outputs diagnostic information
   --csv CSV      Write the output into a csv file with the given file path
+  --packages     Only for dependents: get dependent packages instead of repositories
+  --min-stars MIN_STARS
+                 Only for dependents: limits the output to dependents with at least 
+                 the given number of stargazers.
 ```
 
 So, for example, to get a star plot of a specific repository, you can write:
@@ -85,6 +89,18 @@ $ show-ghstats stars "my-github-username/my-repo" --csv=my_repo-issues
 ```
 This will write a file `my_repo-issues.csv` with the numbers (date+time /
 number of issues) in the current path.
+
+Dependents
+----------
+Getting dependent repositories is a bit different from the other commands, as 
+dependent repositories are not available via the GitHub API, and there is no 
+statistics to show. Instead, the data is collected using web scraping, and output 
+into a CSV file if given or as lines on the standard output.
+There are also 2 specific parameters for this option (`--packages` and `--min-stars`)
+as shown above. Sorting by the number of stargazers is done to show the most known 
+repositories first.
+No caching is done here (yet), so depending on the number of dependent repositories
+the call may take a long time.
 
 Caching
 -------

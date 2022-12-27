@@ -17,7 +17,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     version=__version__,
-    install_requires=["pygithub", "matplotlib"],
+    install_requires=["pygithub", "matplotlib", "requests", "bs4"],
     description="Command line tools for GitHub repo statistics",
     author="mrbean-bremen",
     author_email="hansemrbean@googlemail.com",
