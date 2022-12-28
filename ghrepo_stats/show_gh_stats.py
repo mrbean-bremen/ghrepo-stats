@@ -221,7 +221,7 @@ class GitHubStats:
             return self.handle_output([], [], "")
 
         slots: List[dict] = []
-        start_time = issues[-1].opened
+        start_time = issues[0].opened
         now = datetime.utcnow()
         slot_time = start_time
         while slot_time < now:
@@ -229,7 +229,7 @@ class GitHubStats:
             slot_time = slot_time + timedelta(days=7)
 
         slot_len = len(slots)
-        for issue in reversed(issues):
+        for issue in issues:
             days_from_start = (issue.opened - start_time).days
             index = days_from_start // 7
             days = 7 - days_from_start % 7

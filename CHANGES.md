@@ -3,6 +3,10 @@
 ### New features
 * added output of dependent repositories and packages
 
+### Fixes
+* fixed a regression for showing issue life-times - the feature had been broken 
+  with the recent changes 
+
 ## [Version 0.4.0](https://pypi.org/project/ghrepo-stats/0.4.0/) (2022-12-26)
 
 ### Changes

@@ -23,11 +23,20 @@ The following sub-commands are supported:
   (sampled once a week) 
 - pr-life: shows the average life time in days of issues over time 
   (sampled once a week) 
+- dependents: show which repositories and packages depend on your repository
+  as a list sorted by the number of stargazers
 
-_Caution:_
+Runtime
+-------
 Using sub-commands related to issues and PRs on repositories with many
-(open or close) issues  will take a lot of time due to API access
-limitations.  
+(open or close) issues may take a lot of time due to API access
+limitations the first time they are used on a given repository. 
+Each subsequent call shall be much faster, as the results are cached in the file system
+(as json files in the subdirectory `.ghrepo-stats` in the home directory of the current 
+user).
+Commands not related to issues/prs usually shall not take a long time, except for 
+dependents - these are currently not cached and take a sufficient time 
+(up to several minutes) if there are many of them (e.g. several thousands).
 
 Installation
 ------------
@@ -102,27 +111,19 @@ repositories first.
 No caching is done here (yet), so depending on the number of dependent repositories
 the call may take a long time.
 
-Caching
--------
-Some of the values retrieved from repositories are cached - specifically 
-issues, prs, issue-life, pr-life and stars. The caches are written as json files 
-into the directory `.ghrepo-stats` in the home directory of the current user.
-Especially for repositories with many issues this decreases the time needed to get 
-the data dramatically, if called a second time for the same repository.  
-
 Examples
 --------
 Get some measure of popularity change by showing the number of stargazers over
 time (note: stars that have been retracted are not counted):
-```
-$ show-ghstats stars "jmcgeheeiv/pyfakefs"
+```commandline
+$ show-ghstats stars "pytest-dev/pyfakefs"
 ```
 ![stars](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/stars.png)
 
 Check how issues are handled over time. There are two possibilities:
  - Show the number of open issues at any point in time:
-```
-$ show-ghstats issues "vvvv/svg"
+```commandline
+$ show-ghstats issues "svg-net/svg"
 ```
 ![issues](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issues.png)
 
@@ -130,15 +131,29 @@ $ show-ghstats issues "vvvv/svg"
    increasing curve means ever more unresolved issues (also depends on the
    policies of the specific project - some projects leave issues open
    indefinitely, while others close outdated issues):
-```
-$ show-ghstats issue-life "jmcgeheeiv/pyfakefs"
+```commandline
+$ show-ghstats issue-life "pytest-dev/pyfakefs"
 ```
 ![issue-lifetime](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/issuelife.png)
 
 Get some measure of activity by checking how the code size changed over time 
 (measured in code additions/deletions):
-```
+```commandline
 $ show-ghstats codesize "pytest-dev/pytest"
 ```
 ![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/codesize.png)
 
+Check which well-known packages depend on your repository: 
+```commandline
+$ show-ghstats dependents pydicom/pydicom --packages --min-stars=1000
+```
+```
+fastai/fastai   23163
+activeloopai/deeplake   5120
+pypa/sampleproject      4500
+openvinotoolkit/openvino        3890
+Project-MONAI/MONAI     3675
+Project-MONAI/MONAI     3675
+microsoft/presidio      1906
+Image-Py/imagepy        1209
+```
