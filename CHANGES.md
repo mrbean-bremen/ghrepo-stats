@@ -1,5 +1,11 @@
 # Release Notes
 
+## [Version 0.5.1](https://pypi.org/project/ghrepo-stats/0.5.1/) (2023-01-30)
+
+### Fixes
+* added missing default value for `min-stars` option for dependents (caused crash if 
+  not set)
+
 ## [Version 0.5.0](https://pypi.org/project/ghrepo-stats/0.5.0/) (2022-12-28)
 
 ### New features

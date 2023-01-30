@@ -439,7 +439,7 @@ def main():
     parser.add_argument("--packages", action="store_true",
                         help="Only for dependents: get dependent packages "
                              "instead of repositories")
-    parser.add_argument("--min-stars", type=int,
+    parser.add_argument("--min-stars", type=int, default=0,
                         help="Only for dependents: limits the output to "
                              "dependents with at least the given number of "
                              "stargazers.")
