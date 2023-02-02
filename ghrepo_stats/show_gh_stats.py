@@ -333,17 +333,17 @@ class GitHubStats:
         directory = os.path.dirname(self.csv_file)
         if directory:
             try:
-                os.makedirs(self.csv_file, exist_ok=True)
+                os.makedirs(directory, exist_ok=True)
             except OSError:
                 print(f"Failed to create path {directory} - exiting")
-            return False
+                return False
         try:
             with open(self.csv_file, "w") as csv_file:
                 writer = csv.writer(csv_file, lineterminator="\n")
                 for t, nr in zip(times, numbers):
                     writer.writerow([t, nr])
-        except OSError:
-            print(f"Failed to write csv file {self.csv_file} - exiting")
+        except OSError as ex:
+            print(f"Failed to write csv file {self.csv_file}: {ex}")
             return False
         return True
 

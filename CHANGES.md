@@ -1,5 +1,10 @@
 # Release Notes
 
+## [Version 0.5.2](https://pypi.org/project/ghrepo-stats/0.5.2/) (2023-02-02)
+
+### Fixes
+* fixed `--csv` option: it only worked for a file name without a directory 
+
 ## [Version 0.5.1](https://pypi.org/project/ghrepo-stats/0.5.1/) (2023-01-30)
 
 ### Fixes
