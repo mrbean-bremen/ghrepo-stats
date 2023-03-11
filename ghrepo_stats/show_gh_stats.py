@@ -146,9 +146,6 @@ class GitHubStats:
         start = datetime.utcnow()
         stargazers = self.repository().get_stargazers_with_dates().reversed
         cached, since = self.cached_result(StatKind.Stars)
-        if stargazers.totalCount < len(cached):
-            # void the cache if stars have been removed
-            cached.clear()
         existing_ids = [e["id"] for e in cached]
         results = []
         for stargazer in stargazers:
@@ -157,7 +154,13 @@ class GitHubStats:
             user_id = stargazer.user.id
             if user_id in existing_ids:
                 if len(cached) > stargazers.totalCount - len(results):
-                    cached.clear()
+                    # at least one star has been removed - we remove the cache
+                    # entries backwards until we find the first removed star
+                    while True:
+                        last_id = existing_ids.pop()
+                        cached.pop()
+                        if not cached or last_id == user_id:
+                            break
                 else:
                     break
             results.append({
