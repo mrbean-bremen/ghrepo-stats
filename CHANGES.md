@@ -1,5 +1,7 @@
 # Release Notes
 
+## [Version 0.5.3](https://pypi.org/project/ghrepo-stats/0.5.3/) (2023-03-11)
+
 ### Fixes
 * fixed handling of removed stargazers that have been cached 
 
