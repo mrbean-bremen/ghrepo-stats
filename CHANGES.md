@@ -5,6 +5,7 @@
 
 ### Infrastructure
 * added tests for `ConfigReader` and `star_stats`
+* added GitHub action workflows for tests and release
 
 ## [Version 0.5.3](https://pypi.org/project/ghrepo-stats/0.5.3/) (2023-03-11)
 
