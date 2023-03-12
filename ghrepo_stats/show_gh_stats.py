@@ -16,10 +16,6 @@ from bs4 import BeautifulSoup
 from github import Github, UnknownObjectException
 
 
-class MissingConfig(Exception):
-    pass
-
-
 class UnknownRepository(Exception):
     pass
 
@@ -77,18 +73,8 @@ class ConfigReader:
     def parse(self):
         config = configparser.ConfigParser()
         config.read(self.ini_path())
-        if not config.has_section("auth"):
-            raise MissingConfig(f"Section 'auth' missing in {self.ini_file}, "
-                                f"cannot authorize to GitHub")
         self._username = config.get("auth", "username")
-        if not self._username:
-            raise MissingConfig(f"Missing entry 'username' in"
-                                f" {self.ini_file}, "
-                                f"cannot authorize to GitHub")
         self._token = config.get("auth", "token")
-        if not self._token:
-            raise MissingConfig(f"Missing entry 'token' in {self.ini_file}, "
-                                f"cannot authorize to GitHub")
 
 
 class GitHubStats:
@@ -148,25 +134,37 @@ class GitHubStats:
         cached, since = self.cached_result(StatKind.Stars)
         existing_ids = [e["id"] for e in cached]
         results = []
+        cache_is_valid = False
         for stargazer in stargazers:
             if self.verbose:
                 print(stargazer.starred_at, stargazer.user.login)
             user_id = stargazer.user.id
             if user_id in existing_ids:
+                # we found at least one id that is in the cache
+                cache_is_valid = True
+                found_all = False
                 if len(cached) > stargazers.totalCount - len(results):
                     # at least one star has been removed - we remove the cache
                     # entries backwards until we find the first removed star
-                    while True:
+                    while cached and len(cached) > stargazers.totalCount - len(results):
                         last_id = existing_ids.pop()
                         cached.pop()
-                        if not cached or last_id == user_id:
+                        if last_id == user_id:
                             break
+                        if (len(cached) == stargazers.totalCount - len(results) and
+                                existing_ids[-1] == user_id):
+                            found_all = True
+                            break
+                    if found_all:
+                        break
                 else:
                     break
             results.append({
                 "starred_at": stargazer.starred_at,
                 "id": stargazer.user.id
             })
+        if not cache_is_valid or len(cached) > stargazers.totalCount - len(results):
+            cached.clear()
         if results:
             results.sort(key=lambda s: s["starred_at"])
             cached.extend(results)

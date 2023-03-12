@@ -1,5 +1,11 @@
 # Release Notes
 
+### Fixes
+* fixed a few edge cases in stargazer caching
+
+### Infrastructure
+* added tests for `ConfigReader` and `star_stats`
+
 ## [Version 0.5.3](https://pypi.org/project/ghrepo-stats/0.5.3/) (2023-03-11)
 
 ### Fixes
