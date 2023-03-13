@@ -296,11 +296,12 @@ class GitHubStats:
             if collect_issues == issue["is_pr"]:
                 # ignore PRs or issues
                 continue
-            if (issue["closed_at"] is not None and
-                    (issue["closed_at"] - issue["created_at"]).seconds < 60):
-                # ignore immediately closed issues
-                # happens for imported closed issues
-                continue
+            if issue["closed_at"] is not None:
+                open_time = issue["closed_at"] - issue["created_at"]
+                if open_time.days == 0 and open_time.seconds < 60:
+                    # ignore immediately closed issues
+                    # happens for imported closed issues
+                    continue
             if self.verbose:
                 print(issue["number"], issue["created_at"], issue["closed_at"])
             issues.append(Issue(opened=issue["created_at"],

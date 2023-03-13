@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from ghrepo_stats.show_gh_stats import GitHubStats
+from test.utils import User, PaginatedList
 
 
 @pytest.fixture
@@ -21,31 +22,11 @@ def stargazer_list():
     ])
 
 
-class User:
-    """Mimics github.NamedUser."""
-    def __init__(self, login, user_id):
-        self.login = login
-        self.id = user_id
-
-
 class Stargazer:
     """Mimics github.Stargazer."""
     def __init__(self, starred_at, user):
         self.starred_at = starred_at
         self.user = user
-
-
-class PaginatedList(list):
-    """Mimics github.PaginatedList."""
-    @property
-    def reversed(self):
-        copy = self.copy()
-        copy.reverse()
-        return PaginatedList(copy)
-
-    @property
-    def totalCount(self):
-        return len(self)
 
 
 def test_no_stars(ini_file, stargazers, capsys):

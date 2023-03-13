@@ -2,9 +2,10 @@
 
 ### Fixes
 * fixed a few edge cases in stargazer caching
+* fixed a problem in star/pr stat that could skip some entries 
 
 ### Infrastructure
-* added tests for `ConfigReader` and `star_stats`
+* added tests for `ConfigReader`, `star_stats` and `issue_pr_stats`
 * added GitHub action workflows for tests and release
 
 ## [Version 0.5.3](https://pypi.org/project/ghrepo-stats/0.5.3/) (2023-03-11)
