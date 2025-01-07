@@ -1,5 +1,11 @@
 # Release Notes
 
+## Unreleased
+
+### Infrastructure
+* remove tests for older Python versions, add Python 3.12 and 3.13 to CI
+* add dependabot config for action updates
+
 ## [Version 0.5.4](https://pypi.org/project/ghrepo-stats/0.5.4/) (2023-03-13)
 
 ### Fixes
