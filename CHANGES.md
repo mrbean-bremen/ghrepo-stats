@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixes
+* ignore old cache after results from API have changed (let to exception) 
+
 ### Infrastructure
 * remove tests for older Python versions, add Python 3.12 and 3.13 to CI
 * add dependabot config for action updates

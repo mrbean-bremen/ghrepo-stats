@@ -6,7 +6,7 @@ import enum
 import json
 import os
 from collections import namedtuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from typing import List
 
@@ -129,7 +129,7 @@ class GitHubStats:
         return self.handle_output(issue_nrs, issue_times, title)
 
     def star_stats(self):
-        start = datetime.utcnow()
+        start = datetime.now(UTC)
         stargazers = self.repository().get_stargazers_with_dates().reversed
         cached, since = self.cached_result(StatKind.Stars)
         existing_ids = [e["id"] for e in cached]
@@ -174,7 +174,7 @@ class GitHubStats:
         for stargazer in cached:
             times.append(stargazer["starred_at"])
         if self.verbose:
-            print(f"Getting stars took {datetime.utcnow() - start}")
+            print(f"Getting stars took {datetime.now(UTC) - start}")
         star_nrs = []
         star_times = []
         nr = 0
@@ -223,7 +223,7 @@ class GitHubStats:
 
         slots: List[dict] = []
         start_time = issues[0].opened
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         slot_time = start_time
         while slot_time < now:
             slots.append({"time": slot_time, "nr": 0, "days": 0})
@@ -265,7 +265,7 @@ class GitHubStats:
         if cached:
             kwargs["since"] = since + timedelta(seconds=1)
             last_number = cached[-1]["number"]
-        start = datetime.utcnow()
+        start = datetime.now(UTC)
         results = self.repository().get_issues(**kwargs)
         new_results = []
         for result in results:
@@ -284,7 +284,7 @@ class GitHubStats:
                         cached.remove(c)
                         break
         if self.verbose:
-            print(f"Getting issues/prs took {datetime.utcnow() - start}")
+            print(f"Getting issues/prs took {datetime.now(UTC) - start}")
         if new_results:
             cached.extend(new_results)
             cached.sort(key=lambda v: v["number"])
@@ -359,6 +359,14 @@ class GitHubStats:
         if cache_path.exists():
             with open(cache_path) as f:
                 cached = json.load(f, object_hook=read_datetime)
+                if cached["data"]:
+                    # check if the cache has timezone info, which has been added at some time
+                    # in the API result, and ignore the cache if not so it will be recreated
+                    first_item = cached["data"][0]
+                    created = "created_at" if stat_kind == StatKind.Issues else "starred_at"
+                    first_date = first_item[created]
+                    if first_date.tzinfo is None:
+                        return [], None
                 return cached["data"], cached["since"]
         return [], None
 
