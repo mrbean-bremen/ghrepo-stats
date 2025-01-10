@@ -4,6 +4,7 @@ import configparser
 import csv
 import enum
 import json
+import math
 import os
 from collections import namedtuple
 from datetime import datetime, timedelta, UTC
@@ -324,9 +325,15 @@ class GitHubStats:
         return True
 
     def show_plot(self, issue_nrs, issue_times, title):
+        pyplot.style.use("seaborn-v0_8")
         pyplot.plot(issue_times, issue_nrs)
         max_y = max(issue_nrs) + 1
         step = max(1, max_y // 6)
+        order = int(math.log10(step))
+        tens = 10 ** order
+        base = step // tens
+        base = 10 * base if base > 7 else 5 if base > 3 else 2 if base > 2 else base
+        step = base * tens
         pyplot.yticks(range(0, max_y, step))
         pyplot.title(f"{self.repo_name}: {title}")
         pyplot.show()

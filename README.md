@@ -139,7 +139,7 @@ $ show-ghstats issue-life "pytest-dev/pyfakefs"
 Get some measure of activity by checking how the code size changed over time 
 (measured in code additions/deletions):
 ```commandline
-$ show-ghstats codesize "pytest-dev/pytest"
+$ show-ghstats codesize "pytest-dev/pyfakefs"
 ```
 ![codesize](https://github.com/mrbean-bremen/ghrepo-stats/raw/main/doc/images/codesize.png)
 
