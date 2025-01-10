@@ -6,8 +6,9 @@ import enum
 import json
 import math
 import os
+import sys
 from collections import namedtuple
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List
 
@@ -24,6 +25,14 @@ class UnknownRepository(Exception):
 class StatKind(enum.Enum):
     Issues = 0,
     Stars = 1
+
+
+def utcnow() -> datetime:
+    if sys.version_info < (3, 11):
+        return datetime.utcnow()
+    else:
+        from datetime import UTC
+        return datetime.now(UTC)
 
 
 def write_datetime(obj):
@@ -130,7 +139,7 @@ class GitHubStats:
         return self.handle_output(issue_nrs, issue_times, title)
 
     def star_stats(self):
-        start = datetime.now(UTC)
+        start = utcnow()
         stargazers = self.repository().get_stargazers_with_dates().reversed
         cached, since = self.cached_result(StatKind.Stars)
         existing_ids = [e["id"] for e in cached]
@@ -175,7 +184,7 @@ class GitHubStats:
         for stargazer in cached:
             times.append(stargazer["starred_at"])
         if self.verbose:
-            print(f"Getting stars took {datetime.now(UTC) - start}")
+            print(f"Getting stars took {utcnow() - start}")
         star_nrs = []
         star_times = []
         nr = 0
@@ -224,7 +233,7 @@ class GitHubStats:
 
         slots: List[dict] = []
         start_time = issues[0].opened
-        now = datetime.now(UTC)
+        now = utcnow()
         slot_time = start_time
         while slot_time < now:
             slots.append({"time": slot_time, "nr": 0, "days": 0})
@@ -266,7 +275,7 @@ class GitHubStats:
         if cached:
             kwargs["since"] = since + timedelta(seconds=1)
             last_number = cached[-1]["number"]
-        start = datetime.now(UTC)
+        start = utcnow()
         results = self.repository().get_issues(**kwargs)
         new_results = []
         for result in results:
@@ -285,7 +294,7 @@ class GitHubStats:
                         cached.remove(c)
                         break
         if self.verbose:
-            print(f"Getting issues/prs took {datetime.now(UTC) - start}")
+            print(f"Getting issues/prs took {utcnow() - start}")
         if new_results:
             cached.extend(new_results)
             cached.sort(key=lambda v: v["number"])
