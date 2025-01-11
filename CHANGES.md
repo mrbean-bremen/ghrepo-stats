@@ -1,12 +1,12 @@
 # Release Notes
 
-## Unreleased
+## [Version 0.5.5](https://pypi.org/project/ghrepo-stats/0.5.5/) (2024-01-11)
 
 ### Changes
 * use some styling in the plot
 
 ### Fixes
-* ignore old cache after results from API have changed (let to exception)
+* ignore old cache after results from API have changed (caused exception)
 * show more convenient numbers at y-axis in plot 
 
 ### Infrastructure
